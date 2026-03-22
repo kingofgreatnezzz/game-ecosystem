@@ -5,6 +5,21 @@ const ctx = canvas.getContext("2d");
 canvas.width = 400;
 canvas.height = 400;
 
+// ===== LOAD IMAGES =====
+const images = {
+    head: loadImage("./assets/head.png"),
+    torso: loadImage("./assets/torso.png"),
+    arm: loadImage("./assets/arm.png"),
+    leg: loadImage("./assets/leg.png")
+};
+
+function loadImage(src) {
+    const img = new Image();
+    img.src = src;
+    return img;
+}
+
+// ===== DRAW FUNCTION =====
 export function draw(skeleton) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -12,35 +27,28 @@ export function draw(skeleton) {
     const baseY = skeleton.torso.y;
 
     // torso
-    drawLine(baseX, baseY, baseX, baseY - 60);
+    drawPart(images.torso, baseX, baseY, 0);
 
     // head
-    ctx.beginPath();
-    ctx.arc(baseX, baseY - 75, 10, 0, Math.PI * 2);
-    ctx.stroke();
+    drawPart(images.head, baseX, baseY - 60, skeleton.head.rotation);
 
     // arms
-    drawLimb(baseX, baseY - 40, skeleton.leftArm);
-    drawLimb(baseX, baseY - 40, skeleton.rightArm);
+    drawPart(images.arm, baseX - 25, baseY - 20, skeleton.leftArm.rotation);
+    drawPart(images.arm, baseX + 25, baseY - 20, skeleton.rightArm.rotation);
 
     // legs
-    drawLimb(baseX, baseY + 10, skeleton.leftLeg);
-    drawLimb(baseX, baseY + 10, skeleton.rightLeg);
+    drawPart(images.leg, baseX - 15, baseY + 40, skeleton.leftLeg.rotation);
+    drawPart(images.leg, baseX + 15, baseY + 40, skeleton.rightLeg.rotation);
 }
 
-function drawLine(x1, y1, x2, y2) {
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-}
+// ===== DRAW WITH ROTATION =====
+function drawPart(img, x, y, rotation) {
+    const w = 40;
+    const h = 40;
 
-function drawLimb(x, y, limb) {
-    const length = 40;
-    const angle = limb.rotation;
-
-    const endX = x + Math.cos(angle) * length;
-    const endY = y + Math.sin(angle) * length;
-
-    drawLine(x, y, endX, endY);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.drawImage(img, -w / 2, -h / 2, w, h);
+    ctx.restore();
 }
